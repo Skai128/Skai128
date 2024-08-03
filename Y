@@ -1,0 +1,63 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+local slideAnimationId = "rbxassetid://YOUR_ANIMATION_ID" -- Replace with your Animation ID
+local cooldown = 1 -- Cooldown time in seconds
+local slideSpeed = 50 -- Speed of the slide
+local slideDuration = 0.5 -- Duration of the slide movement in seconds
+
+local canSlide = true
+local slideTrack
+
+-- Function to set up the slide animation and movement
+local function setupSlide(character)
+    local Humanoid = character:WaitForChild("Humanoid")
+    local HumanoidRootPart = character:WaitForChild("HumanoidRootPart")
+    local Animator = Humanoid:FindFirstChildOfClass("Animator")
+
+    if not Animator then
+        warn("Animator not found")
+        return
+    end
+
+    -- Create or reuse the slide animation track
+    local SlideAnimation = Instance.new("Animation")
+    SlideAnimation.AnimationId = slideAnimationId
+    slideTrack = Animator:LoadAnimation(SlideAnimation)
+
+    -- Function to play the slide animation and move the character
+    local function playSlideAnimation()
+        if canSlide then
+            canSlide = false
+            slideTrack:Play()
+            
+            -- Apply force to move the character
+            local slideDirection = HumanoidRootPart.CFrame.LookVector * slideSpeed
+            HumanoidRootPart.AssemblyLinearVelocity = Vector3.new(slideDirection.X, HumanoidRootPart.AssemblyLinearVelocity.Y, slideDirection.Z)
+            
+            -- Reset velocity after the slide duration to stop the character
+            wait(slideDuration)
+            HumanoidRootPart.AssemblyLinearVelocity = Vector3.new(0, HumanoidRootPart.AssemblyLinearVelocity.Y, 0)
+            
+            -- Cooldown before the next slide
+            wait(cooldown)
+            canSlide = true
+        end
+    end
+
+    -- Connect the button click event to the slide function
+    script.Parent.MouseButton1Click:Connect(playSlideAnimation)
+end
+
+-- Set up slide functionality when the character is added
+player.CharacterAdded:Connect(setupSlide)
+
+-- Set up slide functionality for the current character if already loaded
+if player.Character then
+    setupSlide(player.Character)
+end
+
+-- Clean up the button when the player respawns
+player.CharacterRemoving:Connect(function()
+    script.Parent:Destroy()
+end)
