@@ -1,0 +1,7 @@
+script.Parent.Visible = false
+-- [IMPORTANT] Delete the line above me if the GUI is already visible
+
+uis = game:GetService("UserInputService")
+ismobile = uis.TouchEnabled --This line checks if the player is on mobile
+
+script.Parent.Visible = ismobile -- this line makes the script Visible to mobile users
